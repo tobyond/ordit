@@ -3,7 +3,7 @@
 namespace :ordit do
   desc "Audit Stimulus controllers usage and find orphaned controllers"
   task stimulus: :environment do
-    Ordit::Auditor.new.audit.to_console
+    Ordit::Auditor.run
   end
 
   desc "Scan files for stimulus controller usage (e.g., rake audit:scan[products])"
@@ -11,10 +11,10 @@ namespace :ordit do
     controller = args[:controller]
 
     if controller.nil? || controller.empty?
-      puts "Please provide a controller name: rake audit:scan[controller_name]"
+      puts "Please provide a controller name: rake ordit:scan[controller_name]"
       next
     end
 
-    Ordit::Scanner.new.scan(controller)
+    Ordit::Scanner.run(controller)
   end
 end

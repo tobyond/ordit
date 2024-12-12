@@ -65,6 +65,15 @@ class OrditTest < Minitest::Test
     File.write(path, content || "")
   end
 
+  def create_plain_file(name, content = "")
+    parts = name.split("/")
+    filename = parts.pop
+    controller_dir = @temp_dir.join("app/javascript/controllers", *parts)
+    FileUtils.mkdir_p(controller_dir)
+    path = controller_dir.join("#{filename}.js")
+    File.write(path, content || "")
+  end
+
   def create_view_file(name, content)
     parts = name.split("/")
     filename = parts.pop

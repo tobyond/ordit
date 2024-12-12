@@ -2,25 +2,22 @@
 
 module Ordit
   class Scanner
-    def initialize(config = Ordit.configuration)
-      @config = config
+    def self.run(controller)
+      new(controller).run
     end
 
-    def scan(controller)
-      matches = find_matches(controller)
-      print_results(controller, matches)
+    attr_reader :controller
+
+    def initialize(controller)
+      @controller = controller
     end
 
-    private
+    def run
+      print
+    end
 
-    def find_matches(controller)
-      matches = []
-      patterns = [
-        /data-controller=["'](?:[^"']*\s)?#{Regexp.escape(controller)}(?:\s[^"']*)?["']/, # HTML attribute
-        /data:\s*{\s*(?:controller:|:controller\s*=>)\s*["'](?:[^"']*\s)?#{Regexp.escape(controller)}(?:\s[^"']*)?["']/ # Both hash syntaxes
-      ]
-
-      @config.view_paths.each do |path|
+    def results
+      config.view_paths.each_with_object([]) do |path, matches|
         Dir.glob(path.to_s).each do |file|
           content = File.readlines(file)
           content.each_with_index do |line, index|
@@ -34,19 +31,31 @@ module Ordit
           end
         end
       end
-      matches
     end
 
-    def print_results(controller, matches)
+    private
+
+    def config
+      @config ||= Ordit.configuration
+    end
+
+    def patterns
+      @patterns ||= [
+        /data-controller=["'](?:[^"']*\s)?#{Regexp.escape(controller)}(?:\s[^"']*)?["']/, # HTML attribute
+        /data:\s*{\s*(?:controller:|:controller\s*=>)\s*["'](?:[^"']*\s)?#{Regexp.escape(controller)}(?:\s[^"']*)?["']/ # Both hash syntaxes
+      ]
+    end
+
+    def print
       puts "\nSearching for stimulus controller: '#{controller}'\n\n"
 
-      if matches.empty?
+      if results.empty?
         puts "No matches found."
         return
       end
 
       current_file = nil
-      matches.each do |match|
+      results.each do |match|
         if current_file != match[:file]
           puts "📁 #{match[:file]}"
           current_file = match[:file]

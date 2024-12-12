@@ -6,6 +6,7 @@ require_relative "ordit/version"
 require_relative "ordit/configuration"
 require_relative "ordit/auditor"
 require_relative "ordit/scanner"
+require_relative "ordit/result_generator"
 
 if defined?(Rails)
   require "rails"

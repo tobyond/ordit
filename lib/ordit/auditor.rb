@@ -2,27 +2,27 @@
 
 module Ordit
   class Auditor
-    def initialize(config = Ordit.configuration)
-      @config = config
+    def self.run
+      new.run
     end
 
-    def audit
-      defined_controllers = find_defined_controllers
-      used_controllers = find_used_controllers
-
-      AuditResult.new(
-        defined_controllers: defined_controllers,
-        used_controllers: used_controllers,
-        controller_locations: find_controller_locations,
-        usage_locations: find_usage_locations
+    def run
+      ResultGenerator.new(
+        defined_controllers:,
+        used_controllers:,
+        controller_locations:,
+        usage_locations:
       )
     end
 
     private
 
-    def find_defined_controllers
-      controllers = Set.new
-      @config.controller_paths.each do |path|
+    def config
+      @config ||= Ordit.configuration
+    end
+
+    def defined_controllers
+      config.controller_paths.each_with_object(Set.new) do |path, controllers|
         Dir.glob(path.to_s).each do |file|
           # Extract relative path from controllers directory
           full_path = Pathname.new(file)
@@ -32,6 +32,8 @@ module Ordit
 
           # Get path components after 'controllers'
           controller_path = full_path.each_filename.to_a[(controllers_dir + 1)..]
+          next unless controller_path[-1].include?('_controller')
+
           # Remove _controller.js from the last component
           controller_path[-1] = controller_path[-1].sub(/_controller\.(js|ts)$/, "")
           # Join with -- for namespacing and convert underscores to hyphens
@@ -39,17 +41,10 @@ module Ordit
           controllers << name
         end
       end
-      controllers
     end
 
-    def find_used_controllers
-      controllers = Set.new
-      patterns = [
-        /data-controller=["']([^"']+)["']/, # HTML attribute syntax
-        /data:\s*{\s*(?:controller:|:controller\s*=>)\s*["']([^"']+)["']/ # Both hash syntaxes
-      ]
-
-      @config.view_paths.each do |path|
+    def used_controllers
+      config.view_paths.each_with_object(Set.new) do |path, controllers|
         Dir.glob(path.to_s).each do |file|
           content = File.read(file)
           patterns.each do |pattern|
@@ -64,12 +59,10 @@ module Ordit
           end
         end
       end
-      controllers
     end
 
-    def find_controller_locations
-      locations = {}
-      @config.controller_paths.each do |path_pattern|
+    def controller_locations
+      config.controller_paths.each_with_object({}) do |path_pattern, locations|
         Dir.glob(path_pattern).each do |file|
           relative_path = Pathname.new(file).relative_path_from(Dir.pwd)
           controller_path = relative_path.to_s.gsub(%r{^app/javascript/controllers/|_controller\.(js|ts)$}, "")
@@ -77,18 +70,10 @@ module Ordit
           locations[name] = relative_path
         end
       end
-      locations
     end
 
-    def find_usage_locations
-      locations = Hash.new { |h, k| h[k] = {} }
-      patterns = [
-        /data-controller=["']([^"']+)["']/,
-        /data:\s*{(?:[^}]*\s)?controller:\s*["']([^"']+)["']/,
-        /data:\s*{(?:[^}]*\s)?controller\s*=>\s*["']([^"']+)["']/
-      ]
-
-      @config.view_paths.each do |path_pattern|
+    def usage_locations
+      config.view_paths.each_with_object(Hash.new { |h, k| h[k] = {} }) do |path_pattern, locations|
         Dir.glob(path_pattern).each do |file|
           File.readlines(file).each_with_index do |line, index|
             patterns.each do |pattern|
@@ -103,73 +88,16 @@ module Ordit
           end
         end
       end
-      locations
-    end
-  end
-
-  class AuditResult
-    attr_reader :defined_controllers, :used_controllers,
-                :controller_locations, :usage_locations
-
-    def initialize(defined_controllers:, used_controllers:,
-                   controller_locations:, usage_locations:)
-      @defined_controllers = defined_controllers
-      @used_controllers = used_controllers
-      @controller_locations = controller_locations
-      @usage_locations = usage_locations
     end
 
-    def unused_controllers
-      defined_controllers - used_controllers
-    end
-
-    def undefined_controllers
-      used_controllers - defined_controllers
-    end
-
-    def active_controllers
-      defined_controllers & used_controllers
-    end
-
-    def to_console
-      puts "\n📊 Stimulus Controller Audit\n"
-
-      if unused_controllers.any?
-        puts "\n❌ Defined but unused controllers:"
-        unused_controllers.sort.each do |controller|
-          puts "   #{controller}"
-          puts "   └─ #{controller_locations[controller]}"
-        end
-      end
-
-      if undefined_controllers.any?
-        puts "\n⚠️  Used but undefined controllers:"
-        undefined_controllers.sort.each do |controller|
-          puts "   #{controller}"
-          usage_locations[controller].each do |file, lines|
-            puts "   └─ #{file} (lines: #{lines.join(", ")})"
-          end
-        end
-      end
-
-      if active_controllers.any?
-        puts "\n✅ Active controllers:"
-        active_controllers.sort.each do |controller|
-          puts "   #{controller}"
-          puts "   └─ Defined in: #{controller_locations[controller]}"
-          puts "   └─ Used in:"
-          usage_locations[controller].each do |file, lines|
-            puts "      └─ #{file} (lines: #{lines.join(", ")})"
-          end
-        end
-      end
-
-      puts "\n📈 Summary:"
-      puts "   Total controllers defined: #{defined_controllers.size}"
-      puts "   Total controllers in use:  #{used_controllers.size}"
-      puts "   Unused controllers:        #{unused_controllers.size}"
-      puts "   Undefined controllers:     #{undefined_controllers.size}"
-      puts "   Properly paired:           #{active_controllers.size}"
+    def patterns
+      @patterns ||= [
+        /data-controller=["']([^"']+)["']/, # HTML attribute syntax
+        # Ruby 1.9+ hash syntax - covers both with and without symbol prefix
+        /data:\s*{(?:[^}]*\s)?(?::)?controller:\s*["']([^"']+)["']/,
+        # Hash rocket syntax - covers both with and without symbol prefix
+        /data:\s*{(?:[^}]*\s)?(?::)?controller\s*=>\s*["']([^"']+)["']/
+      ]
     end
   end
 end

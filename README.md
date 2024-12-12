@@ -56,13 +56,13 @@ Example output:
 Find all uses of a specific controller:
 
 ```bash
-rails audit:scan[controller_name]
+rails ordit:scan[controller_name]
 ```
 
 Example:
 ```bash
-rails audit:scan[products]
-rails audit:scan[users--name]  # For namespaced controllers
+rails ordit:scan[products]
+rails ordit:scan[users--name]  # For namespaced controllers
 ```
 
 ### Configuration

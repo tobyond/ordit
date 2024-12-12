@@ -9,8 +9,8 @@ class ScannerTest < OrditTest
       <div data-controller="other"></div>
     HTML
 
-    scanner = Ordit::Scanner.new
-    matches = scanner.send(:find_matches, "toggle")
+    scanner = Ordit::Scanner.new('toggle')
+    matches = scanner.results
 
     assert_equal 1, matches.length
     assert_match(/toggle/, matches.first[:content])
@@ -21,8 +21,8 @@ class ScannerTest < OrditTest
       <div data-controller="users--name"></div>
     HTML
 
-    scanner = Ordit::Scanner.new
-    matches = scanner.send(:find_matches, "users--name")
+    scanner = Ordit::Scanner.new('users--name')
+    matches = scanner.results
 
     assert_equal 1, matches.length
     assert_match(/users--name/, matches.first[:content])
@@ -33,8 +33,8 @@ class ScannerTest < OrditTest
       <%= f.submit 'Save', data: { controller: 'products--form' } %>
     ERB
 
-    scanner = Ordit::Scanner.new
-    matches = scanner.send(:find_matches, "products--form")
+    scanner = Ordit::Scanner.new('products--form')
+    matches = scanner.results
 
     assert_equal 1, matches.length
     assert_match(/products--form/, matches.first[:content])
@@ -45,8 +45,8 @@ class ScannerTest < OrditTest
       <%= f.submit 'Update', data: { :controller => 'users--name' } %>
     ERB
 
-    scanner = Ordit::Scanner.new
-    matches = scanner.send(:find_matches, "users--name")
+    scanner = Ordit::Scanner.new('users--name')
+    matches = scanner.results
 
     assert_equal 1, matches.length
     assert_match(/users--name/, matches.first[:content])
@@ -57,8 +57,8 @@ class ScannerTest < OrditTest
       <div data-controller="modal users--name toggle"></div>
     HTML
 
-    scanner = Ordit::Scanner.new
-    matches = scanner.send(:find_matches, "users--name")
+    scanner = Ordit::Scanner.new('users--name')
+    matches = scanner.results
 
     assert_equal 1, matches.length
     assert_match(/users--name/, matches.first[:content])
