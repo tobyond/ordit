@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-namespace :audit do
+namespace :ordit do
   desc "Audit Stimulus controllers usage and find orphaned controllers"
   task stimulus: :environment do
-    StimulusAudit::Auditor.new.audit.to_console
+    Ordit::Auditor.new.audit.to_console
   end
 
   desc "Scan files for stimulus controller usage (e.g., rake audit:scan[products])"
@@ -15,6 +15,6 @@ namespace :audit do
       next
     end
 
-    StimulusAudit::Scanner.new.scan(controller)
+    Ordit::Scanner.new.scan(controller)
   end
 end
