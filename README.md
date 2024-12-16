@@ -28,27 +28,21 @@ rails ordit:stimulus
 This will show:
 - Controllers that are defined but never used
 - Controllers that are used but don't have corresponding files
-- Active controllers and where they're being used
 - Summary statistics
 
 Example output:
 ```
 📊 Stimulus Controller Audit
 
-❌ Defined but unused controllers:
-   unused_feature
-   └─ app/javascript/controllers/unused_feature_controller.js
+❌ Controllers not defined in any views:
+   unused-feature
+   users--edit-password
 
 ⚠️  Used but undefined controllers:
-   missing_controller
-   └─ app/views/products/show.html.erb (lines: 15, 23)
+   missing-controller
+   └─  📁 app/views/products/show.html.erb
+       📁 app/views/users/edit.html.erb
 
-✅ Active controllers:
-   products
-   └─ Defined in: app/javascript/controllers/products_controller.js
-   └─ Used in:
-      └─ app/views/products/index.html.erb (lines: 10, 45)
-      └─ app/components/product_card/component.html.erb (lines: 3)
 ```
 
 ### Scan for Specific Controller Usage
@@ -56,13 +50,19 @@ Example output:
 Find all uses of a specific controller:
 
 ```bash
-rails ordit:scan[controller_name]
+rails ordit:scan[toggle]
+rails ordit:scan[users--name]  # For namespaced controllers
 ```
 
-Example:
-```bash
-rails ordit:scan[products]
-rails ordit:scan[users--name]  # For namespaced controllers
+Example output:
+
+```
+Searching for stimulus controller: 'toggle'
+
+📁 app/views/admin/new.html.erb
+📁 app/views/posts/edit.html.erb
+📁 app/views/products/show.html.erb
+📁 app/views/users/edit.html.erb
 ```
 
 ### Configuration
