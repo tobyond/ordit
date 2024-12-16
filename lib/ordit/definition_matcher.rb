@@ -7,7 +7,7 @@ module Ordit
     # Match controller: in Ruby/ERB
     RUBY_PATTERN = /controller:\s*['"]([^'"]+)['"]/.freeze
     # Match 'controller' => in Ruby/ERB
-    HASH_ROCKET_PATTERN = /'controller'\s*=>\s*['"]([^'"]+)['"]/.freeze
+    HASH_ROCKET_PATTERN = /(?:['"]controller['"]|:controller)\s*=>\s*['"]([^'"]+)['"]/.freeze
 
     ALL_REGEX = [HTML_PATTERN, RUBY_PATTERN, HASH_ROCKET_PATTERN].freeze
 

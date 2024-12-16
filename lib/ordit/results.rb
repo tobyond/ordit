@@ -7,7 +7,7 @@ module Ordit
     end
 
     def files
-      return Files.find(@name) if @name
+      return Definitions.find(@name) if @name
 
       Files.all
     end
@@ -16,31 +16,33 @@ module Ordit
       Definitions.all
     end
 
-    def active_controllers = to_h[:active_controllers]
+    def active_controllers = to_h[:active_controllers].sort
     def undefined_controllers = to_h[:undefined_controllers]
-    def unused_controllers = to_h[:unused_controllers]
+    def unused_controllers = to_h[:unused_controllers].sort
 
     def to_h
       @to_h ||= begin
         base_object = {
           active_controllers: [],
-          undefined_controllers: [],
+          undefined_controllers: {},
           unused_controllers: files.dup || []
         }
 
 
-        definitions.each_with_object(base_object) do |definition, result|
+        definitions.each_with_object(base_object) do |(definition, file), result|
           # Convert definition pattern to match file pattern
           file_pattern = definition_to_file_pattern(definition)
 
           # Find matching file
-          matching_file = files.find { |file| file_pattern == file_pattern_from_path(file) }
+          matching_file = files.find { |f| file_pattern == file_pattern_from_path(f) }
 
           if matching_file
             result[:active_controllers] << matching_file
             result[:unused_controllers].delete(matching_file)
+            result[:active_controllers].sort!
           else
-            result[:undefined_controllers] << definition
+            result[:undefined_controllers][definition] ||= []
+            result[:undefined_controllers][definition] |= file
           end
         end
       end

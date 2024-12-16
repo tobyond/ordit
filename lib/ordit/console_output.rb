@@ -19,7 +19,7 @@ module Ordit
     end
 
     def run
-      return print_scan if @name
+      return print_find if @name
 
       print_audit
     end
@@ -28,23 +28,20 @@ module Ordit
       puts "\n📊 Stimulus Controller Audit\n"
 
       if unused_controllers.any?
-        puts "\n❌ Defined but unused controllers:"
+        puts "\n❌ Controllers not defined in any views:"
         unused_controllers.sort.each do |controller|
           puts "   #{controller}"
         end
       end
 
       if undefined_controllers.any?
-        puts "\n⚠️  Used but undefined controllers:"
-        undefined_controllers.sort.each do |controller|
-          puts "   #{controller}"
-        end
-      end
+        puts "\n⚠️ View with defined but missing controller:"
+        undefined_controllers.each do |controller, files|
+          puts "\n   #{controller}_controller"
 
-      if active_controllers.any?
-        puts "\n✅ Active controllers:"
-        active_controllers.sort.each do |controller|
-          puts "   #{controller}"
+          files.each_with_index do |file, index|
+            puts "   #{ index.zero? ? '└─' : '  ' } 📁 #{file}"
+          end
         end
       end
 
@@ -55,7 +52,7 @@ module Ordit
       puts "   Undefined controllers:     #{undefined_controllers.size}"
     end
 
-    def print_scan
+    def print_find
       puts "\nSearching for stimulus controller: '#{@name}'\n\n"
 
       if files.empty?
