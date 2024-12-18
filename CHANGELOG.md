@@ -1,5 +1,9 @@
 ## [Unreleased]
 
+## [0.1.4] - 2024-16-12
+
+- remove scan, your editor does this already
+
 ## [0.1.3] - 2024-16-12
 
 - more refactor, clean up, make more logical

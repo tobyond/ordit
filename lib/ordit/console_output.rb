@@ -6,21 +6,18 @@ module Ordit
   class ConsoleOutput
     extend Forwardable
 
-    def self.run(name = nil)
-      new(name).run
+    def self.run
+      new.run
     end
 
     def_delegators :@results,
                    :files, :active_controllers, :undefined_controllers, :unused_controllers
 
-    def initialize(name = nil)
-      @name = name
-      @results = Results.new(name)
+    def initialize
+      @results = Results.new
     end
 
     def run
-      return print_find if @name
-
       print_audit
     end
 
@@ -50,19 +47,6 @@ module Ordit
       puts "   Total controllers in use:  #{active_controllers.size}"
       puts "   Unused controllers:        #{unused_controllers.size}"
       puts "   Undefined controllers:     #{undefined_controllers.size}"
-    end
-
-    def print_find
-      puts "\nSearching for stimulus controller: '#{@name}'\n\n"
-
-      if files.empty?
-        puts "No matches found."
-        return
-      end
-
-      files.each do |file|
-        puts "📁 #{file}"
-      end
     end
   end
 end

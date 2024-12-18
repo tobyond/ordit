@@ -2,13 +2,10 @@
 
 module Ordit
   class Results
-    def initialize(name = nil)
-      @name = name
+    def initialize
     end
 
     def files
-      return Definitions.find(@name) if @name
-
       Files.all
     end
 

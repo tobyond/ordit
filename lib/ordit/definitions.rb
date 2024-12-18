@@ -19,19 +19,5 @@ module Ordit
         end
       end
     end
-
-    def self.find(name)
-      Ordit.configuration.view_paths.flat_map do |path|
-        results = Dir.glob(path.to_s).reject do |file|
-          content = File.read(file)
-          matches = DefinitionMatcher.run(content)
-          matches.empty?
-        end
-
-        results.flat_map do |result|
-          Pathname.new(result).relative_path_from(Pathname.new(Ordit.root)).to_s
-        end
-      end
-    end
   end
 end

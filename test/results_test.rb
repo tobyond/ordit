@@ -64,43 +64,6 @@ class ResultsTest < OrditTest
     assert_equal result, expected_result
   end
 
-  def test_finds_specific_view_file
-    view = %w[
-      addresses
-      analytics
-      ar-modal
-      all-buttons
-      cart
-      collection-drop
-      products--collections
-      internal--click-for-confirmation
-      missing
-    ].each_with_object(String.new) do |definition, s|
-      s << <<-HTML
-        <div data-controller="#{definition}"></div>
-      HTML
-    end
-    create_view_file("users/index.html", view)
-
-    %w[
-      addresses
-      analytics
-      ar_modal
-      all_buttons
-      cart
-      collection_drop
-      products/collections
-      internal/click_for_confirmation
-      not_defined
-    ].each do |controller|
-      create_controller_file(controller)
-    end
-
-    result = Ordit::Results.new("addresses").files
-
-    assert_equal result, ["test/tmp/ordit_test/app/views/users/index.html"]
-  end
-
   def test_finds_unused_controllers
     create_controller_file("toggle")
     create_controller_file("users/name")

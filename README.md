@@ -17,7 +17,7 @@ bundle install
 
 ## Usage
 
-### Audit All Controllers
+### Audit Stimulus Controllers
 
 Run an audit to see all defined and used controllers in your application:
 
@@ -43,26 +43,6 @@ Example output:
    └─  📁 app/views/products/show.html.erb
        📁 app/views/users/edit.html.erb
 
-```
-
-### Scan for Specific Controller Usage
-
-Find all uses of a specific controller:
-
-```bash
-rails ordit:scan[toggle]
-rails ordit:scan[users--name]  # For namespaced controllers
-```
-
-Example output:
-
-```
-Searching for stimulus controller: 'toggle'
-
-📁 app/views/admin/new.html.erb
-📁 app/views/posts/edit.html.erb
-📁 app/views/products/show.html.erb
-📁 app/views/users/edit.html.erb
 ```
 
 ### Configuration
@@ -98,6 +78,9 @@ end
   
   # Hash rocket syntax
   <%= f.submit 'Save', data: { :controller => 'products' } %>
+
+  # Hash rocket string syntax
+  <%= f.submit 'Save', 'data' => { 'controller' => 'products' } %>
   ```
 - Scans ERB, HTML, and HAML files
 - Works with both JavaScript and TypeScript controller files
